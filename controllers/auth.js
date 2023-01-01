@@ -46,6 +46,7 @@ exports.signup = asyncHandler(async (req, res, next) => {
     passwordChangedAt,
   });
 
+  newUser.password = undefined;
   const token = signToken(newUser._id);
 
   const cookieOptions = {
@@ -63,9 +64,11 @@ exports.signup = asyncHandler(async (req, res, next) => {
   await sendEmail(email, url, '', 'Activate your Account.');
   res.status(201).json({
     status: 'success',
+    token,
     data: {
       message:
         'You registered successfully. Please go to your email inbox and confirm your account ✔️.',
+      user: newUser,
     },
   });
 });
@@ -94,4 +97,15 @@ exports.signin = asyncHandler(async (req, res, next) => {
 
   existUser.password = undefined;
   createSendToken(existUser._id, existUser, 200, res);
+});
+
+exports.signoutUser = asyncHandler(async (req, res, next) => {
+  res.cookie('jwt', 'none', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  return res.status(200).json({
+    success: true,
+    data: {},
+  });
 });

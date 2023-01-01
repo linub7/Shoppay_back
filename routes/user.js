@@ -37,7 +37,7 @@ router.param('id', (req, res, next, val) => {
 
 router.post('/auth/signup', signup);
 router.post('/auth/signin', signin);
-// router.get('/auth/signout', protect, signoutUser);
+router.get('/auth/signout', protect, signoutUser);
 
 // router.route('/users').get(protect, authorize('admin'), getAllUsers);
 

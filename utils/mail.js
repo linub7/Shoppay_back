@@ -1,6 +1,5 @@
 const nodemailer = require('nodemailer');
 const google = require('googleapis');
-const { activateEmailTemplate } = require('../emails/activateEmailTemplate');
 const { OAuth2Client } = google.Auth;
 
 const OAUTH_PLAYGROUND = `https://developers.google.com/oauthplayground`;
@@ -19,7 +18,7 @@ const oauth2Client = new OAuth2Client(
   OAUTH_PLAYGROUND
 );
 
-const sendEmail = async (to, url, text, subject) => {
+const sendEmail = async (to, text, subject, html) => {
   oauth2Client.setCredentials({
     refresh_token: OAUTH_REFRESH_TOKEN,
   });
@@ -39,7 +38,7 @@ const sendEmail = async (to, url, text, subject) => {
     from: SENDER_EMAIL_ADDRESS,
     to,
     subject,
-    html: activateEmailTemplate(to, url),
+    html,
   };
 
   try {
@@ -50,26 +49,5 @@ const sendEmail = async (to, url, text, subject) => {
     return err;
   }
 };
-
-// const sendEmail = async (options) => {
-//   // 1) Create a transporter
-//   const transporter = nodemailer.createTransport({
-//     host: process.env.EMAIL_HOST,
-//     auth: {
-//       user: process.env.EMAIL_USERNAME,
-//       pass: process.env.EMAIL_PASSWORD,
-//     },
-//   });
-//   // 2) Define Email Options
-//   const mailOptions = {
-//     from: 'Mohammad Hadi<hello@mohammad.io>',
-//     to: options.email,
-//     subject: options.subject,
-//     text: options.message,
-//     // html: TODO
-//   };
-//   // 3) Actually send the email
-//   await transporter.sendMail(mailOptions);
-// };
 
 module.exports = sendEmail;

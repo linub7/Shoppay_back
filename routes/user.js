@@ -31,9 +31,9 @@ router.param('id', (req, res, next, val) => {
   next();
 });
 
-// router.post('/auth/forgot-password', forgotPassword);
-// router.patch('/auth/reset-password/:token', resetPassword);
-// router.patch('/auth/update-my-password', protect, updatePassword);
+router.post('/auth/forgot-password', forgotPassword);
+router.patch('/auth/reset-password/:token', resetPassword);
+router.patch('/auth/update-my-password', protect, updatePassword);
 
 router.post('/auth/signup', signup);
 router.post('/auth/signin', signin);

@@ -138,7 +138,6 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   //   'host'
   // )}/api/v1/auth/reset-password/${resetToken}`;
   const resetURL = `${process.env.FRONTEND_URL}/auth/reset-password?resetToken=${resetToken}`;
-  console.log(resetURL);
   const html = resetPasswordTemplate(resetURL);
 
   try {

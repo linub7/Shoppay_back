@@ -47,7 +47,6 @@ const ProductSchema = new Schema(
     },
     slug: {
       type: String,
-      required: [true, 'slug is required'],
       unique: true,
       index: true,
     },

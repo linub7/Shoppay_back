@@ -1,5 +1,4 @@
 const express = require('express');
-const { isValidObjectId } = require('mongoose');
 const {
   getAllProducts,
   createProduct,
@@ -14,20 +13,13 @@ const AppError = require('../utils/AppError');
 
 const router = express.Router();
 
-router.param('id', (req, res, next, val) => {
-  if (!isValidObjectId(val)) {
-    return next(new AppError('Please provide a valid id', 400));
-  }
-  next();
-});
-
 router
   .route('/products')
   .get(getAllProducts)
   .post(protect, authorize('admin'), createProduct);
 
 router
-  .route('/products/:id')
+  .route('/products/:slug')
   .get(getSingleProduct)
   .patch(protect, authorize('admin'), updateProduct)
   .delete(protect, authorize('admin'), deleteProduct);

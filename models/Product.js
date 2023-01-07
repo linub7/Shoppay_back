@@ -100,6 +100,7 @@ const ProductSchema = new Schema(
     },
     subProducts: [
       {
+        sku: String,
         images: [],
         descriptionImages: [],
         color: {

@@ -6,7 +6,6 @@ const factory = require('./handlerFactory');
 exports.getAllProducts = factory.getAll(Product);
 
 exports.getSingleProduct = factory.getSingleOne(Product, [
-  { path: 'user' },
   { path: 'category' },
   { path: 'subcategories' },
 ]);

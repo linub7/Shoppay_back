@@ -5,12 +5,14 @@ const AppError = require('../utils/AppError');
 exports.deleteOne = (Model) =>
   asyncHandler(async (req, res, next) => {
     const {
-      params: { id },
+      params: { slug },
     } = req;
-    const doc = await Model.findByIdAndDelete(id);
+    const doc = await Model.findOneAndDelete({ slug });
 
     if (!doc) {
-      return next(new AppError(`Document with ${id} was not found in db`, 404));
+      return next(
+        new AppError(`Document with ${slug} was not found in db`, 404)
+      );
     }
 
     return res.json({
@@ -22,10 +24,10 @@ exports.deleteOne = (Model) =>
 exports.updateOne = (Model) =>
   asyncHandler(async (req, res, next) => {
     const {
-      params: { id },
+      params: { slug },
       body,
     } = req;
-    const updatedDoc = await Model.findByIdAndUpdate(id, body, {
+    const updatedDoc = await Model.findOneAndUpdate({ slug }, body, {
       new: true,
       runValidators: true,
     });
@@ -43,12 +45,13 @@ exports.updateOne = (Model) =>
 exports.getSingleOne = (Model, populateOptions) =>
   asyncHandler(async (req, res, next) => {
     const {
-      params: { id },
+      params: { slug },
     } = req;
 
-    let query = Model.findById(id);
+    let query = Model.findOne({ slug });
 
-    if (populateOptions) query = Model.findById(id).populate(populateOptions);
+    if (populateOptions)
+      query = Model.findOne({ slug }).populate(populateOptions);
 
     const doc = await query;
 
@@ -63,13 +66,9 @@ exports.getSingleOne = (Model, populateOptions) =>
 
 exports.getAll = (Model) =>
   asyncHandler(async (req, res, next) => {
-    const {
-      params: { id },
-      query,
-    } = req;
+    const { query } = req;
     // To allow fr nested GET on reviews on tour
     let filter = {};
-    if (id) filter = { tour: id };
 
     // Execute Query
     const features = new ApiFeature(Model.find(filter), query)

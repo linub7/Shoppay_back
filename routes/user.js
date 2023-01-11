@@ -16,6 +16,7 @@ const {
   deleteUser,
   updateMe,
   deleteMe,
+  saveCartToDb,
 } = require('../controllers/user');
 const { protect, getMe, authorize } = require('../middleware/auth');
 const User = require('../models/User');
@@ -38,6 +39,8 @@ router.patch('/auth/update-my-password', protect, updatePassword);
 router.post('/auth/signup', signup);
 router.post('/auth/signin', signin);
 router.get('/auth/signout', protect, signoutUser);
+
+router.post('/user/save-cart', protect, saveCartToDb);
 
 // router.route('/users').get(protect, authorize('admin'), getAllUsers);
 

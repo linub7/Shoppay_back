@@ -55,3 +55,75 @@ exports.saveCartToDb = asyncHandler(async (req, res, next) => {
     message: 'add cart to db successfully done.',
   });
 });
+
+exports.getUserCart = asyncHandler(async (req, res, next) => {
+  const { user } = req;
+
+  const cart = await Cart.findOne({ user: user._id })
+    .populate('products.product')
+    .populate('user');
+
+  return res.json({
+    status: 'success',
+    data: {
+      data: cart,
+    },
+  });
+});
+
+exports.saveAddressToDb = asyncHandler(async (req, res, next) => {
+  const {
+    body: { address },
+    user,
+  } = req;
+
+  const usr = await User.findById(user.id);
+  const newUser = await usr.updateOne(
+    {
+      $push: {
+        addresses: address,
+      },
+    },
+    { new: true, runValidators: true }
+  );
+  return res.json({
+    status: 'success',
+    data: {
+      data: newUser.addresses,
+    },
+  });
+});
+
+exports.changeAddressState = asyncHandler(async (req, res, next) => {
+  const {
+    body: { addressId },
+    user,
+  } = req;
+
+  const usr = await User.findById(user.id);
+  const userAddresses = usr.addresses;
+  let addresses = [];
+  for (let index = 0; index < userAddresses.length; index++) {
+    let tempAddress = {};
+    const element = userAddresses[index];
+    if (element._id === addressId) {
+      tempAddress = { ...element.toObject(), active: true };
+      addresses.push(tempAddress);
+    } else {
+      tempAddress = { ...element.toObject(), active: false };
+      addresses.push(tempAddress);
+    }
+  }
+  const newUser = await usr.updateOne(
+    {
+      addresses,
+    },
+    { new: true, runValidators: true }
+  );
+  return res.json({
+    status: 'success',
+    data: {
+      data: newUser.addresses,
+    },
+  });
+});

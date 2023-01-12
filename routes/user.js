@@ -17,6 +17,9 @@ const {
   updateMe,
   deleteMe,
   saveCartToDb,
+  getUserCart,
+  saveAddressToDb,
+  changeAddressState,
 } = require('../controllers/user');
 const { protect, getMe, authorize } = require('../middleware/auth');
 const User = require('../models/User');
@@ -40,7 +43,13 @@ router.post('/auth/signup', signup);
 router.post('/auth/signin', signin);
 router.get('/auth/signout', protect, signoutUser);
 
-router.post('/user/save-cart', protect, saveCartToDb);
+router
+  .route('/user/cart')
+  .get(protect, getUserCart)
+  .post(protect, saveCartToDb);
+
+router.route('/user/address').post(protect, saveAddressToDb);
+router.route('/user/manage-address').patch(protect, changeAddressState);
 
 // router.route('/users').get(protect, authorize('admin'), getAllUsers);
 

@@ -127,3 +127,26 @@ exports.changeAddressState = asyncHandler(async (req, res, next) => {
     },
   });
 });
+
+exports.deleteAddressFromDb = asyncHandler(async (req, res, next) => {
+  const {
+    params: { addressId },
+    user,
+  } = req;
+
+  const usr = await User.findById(user.id);
+  const updatedUser = await usr.updateOne(
+    {
+      $pull: {
+        addresses: { _id: addressId },
+      },
+    },
+    { new: true, runValidators: true }
+  );
+  return res.json({
+    status: 'success',
+    data: {
+      data: updatedUser?.addresses,
+    },
+  });
+});

@@ -20,6 +20,7 @@ const {
   getUserCart,
   saveAddressToDb,
   changeAddressState,
+  deleteAddressFromDb,
 } = require('../controllers/user');
 const { protect, getMe, authorize } = require('../middleware/auth');
 const User = require('../models/User');
@@ -48,7 +49,9 @@ router
   .get(protect, getUserCart)
   .post(protect, saveCartToDb);
 
+router.route('/user/address/:addressId').delete(protect, deleteAddressFromDb);
 router.route('/user/address').post(protect, saveAddressToDb);
+
 router.route('/user/manage-address').patch(protect, changeAddressState);
 
 // router.route('/users').get(protect, authorize('admin'), getAllUsers);

@@ -4,7 +4,14 @@ const asyncHandler = require('../middleware/async');
 
 exports.placeOrder = asyncHandler(async (req, res, next) => {
   const {
-    body: { products, shippingAddress, paymentMethod, total },
+    body: {
+      products,
+      shippingAddress,
+      paymentMethod,
+      total,
+      totalBeforeDiscount,
+      couponApplied,
+    },
     user,
   } = req;
 
@@ -24,6 +31,8 @@ exports.placeOrder = asyncHandler(async (req, res, next) => {
     shippingAddress,
     paymentMethod,
     total,
+    totalBeforeDiscount,
+    couponApplied,
   });
 
   return res.status(201).json({
@@ -31,6 +40,28 @@ exports.placeOrder = asyncHandler(async (req, res, next) => {
     data: {
       data: {
         orderId: newOrder._id,
+      },
+    },
+  });
+});
+
+exports.getOrder = asyncHandler(async (req, res, next) => {
+  const {
+    params: { id },
+    user,
+  } = req;
+
+  const existedOrder = await Order.findById(id).populate('user');
+  if (!existedOrder) return next(new AppError('Order was not found.', 400));
+
+  if (existedOrder?.user !== user.id)
+    return next(new AppError('Invalid Credentials', 401));
+
+  return res.json({
+    status: 'success',
+    data: {
+      data: {
+        order: existedOrder,
       },
     },
   });

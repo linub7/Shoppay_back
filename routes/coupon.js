@@ -1,6 +1,10 @@
 const express = require('express');
 const { isValidObjectId } = require('mongoose');
-const { createCoupon, getAllCoupons } = require('../controllers/coupon');
+const {
+  createCoupon,
+  getAllCoupons,
+  applyCoupon,
+} = require('../controllers/coupon');
 
 const { protect, getMe, authorize } = require('../middleware/auth');
 const AppError = require('../utils/AppError');
@@ -18,6 +22,8 @@ router
   .route('/coupons')
   .get(getAllCoupons)
   .post(protect, authorize('admin'), createCoupon);
+
+router.post('/coupons/apply-coupon', protect, applyCoupon);
 
 // router
 //   .route('/categories/:id')

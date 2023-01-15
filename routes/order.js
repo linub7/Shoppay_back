@@ -1,6 +1,6 @@
 const express = require('express');
 const { isValidObjectId } = require('mongoose');
-const { placeOrder, getOrder } = require('../controllers/order');
+const { placeOrder, getOrder, payWithStripe } = require('../controllers/order');
 const factory = require('../controllers/handlerFactory');
 
 const { protect, getMe, authorize } = require('../middleware/auth');
@@ -16,6 +16,8 @@ router.param('id', (req, res, next, val) => {
 });
 
 router.route('/orders/:id').get(protect, getOrder);
+
+router.post('/orders/:id/pay-with-stripe', protect, payWithStripe);
 
 router.post('/orders/place-order', protect, placeOrder);
 

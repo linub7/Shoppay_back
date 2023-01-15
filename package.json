@@ -29,6 +29,7 @@
     "ndb": "^1.1.5",
     "nodemailer": "^6.8.0",
     "slugify": "^1.6.5",
+    "stripe": "^11.6.0",
     "validator": "^13.7.0",
     "xss-clean": "^0.1.1"
   }

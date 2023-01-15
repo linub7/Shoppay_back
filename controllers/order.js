@@ -1,6 +1,8 @@
 const User = require('../models/User');
 const Order = require('../models/Order');
 const asyncHandler = require('../middleware/async');
+const AppError = require('../utils/AppError');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 exports.placeOrder = asyncHandler(async (req, res, next) => {
   const {
@@ -64,5 +66,36 @@ exports.getOrder = asyncHandler(async (req, res, next) => {
         order: existedOrder,
       },
     },
+  });
+});
+
+exports.payWithStripe = asyncHandler(async (req, res, next) => {
+  const {
+    body: { amount, id },
+    user,
+  } = req;
+  const payment = await stripe.paymentIntents.create({
+    amount: Math.round(amount * 1000),
+    currency: 'USD',
+    description: 'MUME Shop',
+    payment_method: id,
+    confirm: true,
+  });
+
+  const order = await Order.findById(req.params.id);
+  if (!order) return next(new AppError('Order was not found.', 404));
+  if (order.user !== user.id)
+    return next(new AppError('Invalid Credentials', 401));
+
+  order.isPaid = true;
+  order.paidAt = Date.now();
+  order.paymentResult = {
+    id: payment?.id,
+    status: payment?.status,
+    email: payment?.email_address,
+  };
+  await order.save();
+  return res.json({
+    status: 'success',
   });
 });

@@ -56,7 +56,9 @@ exports.getSingleOne = (Model, populateOptions) =>
     const doc = await query;
 
     if (!doc) {
-      return next(new AppError(`Document with ${id} was not found in db`, 404));
+      return next(
+        new AppError(`Document with ${slug} was not found in db`, 404)
+      );
     }
     return res.json({
       status: 'success',

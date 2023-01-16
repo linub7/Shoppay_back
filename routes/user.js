@@ -1,6 +1,7 @@
 const express = require('express');
 const { isValidObjectId } = require('mongoose');
 const {
+  getMe,
   signup,
   signin,
   forgotPassword,
@@ -22,7 +23,7 @@ const {
   changeAddressState,
   deleteAddressFromDb,
 } = require('../controllers/user');
-const { protect, getMe, authorize } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 const User = require('../models/User');
 const AppError = require('../utils/AppError');
 // const { uploadImage } = require('../middleware/multer');
@@ -43,6 +44,7 @@ router.patch('/auth/update-my-password', protect, updatePassword);
 router.post('/auth/signup', signup);
 router.post('/auth/signin', signin);
 router.get('/auth/signout', protect, signoutUser);
+router.get('/auth/me', protect, getMe);
 
 router
   .route('/user/cart')
@@ -54,9 +56,8 @@ router.route('/user/address').post(protect, saveAddressToDb);
 
 router.route('/user/manage-address').patch(protect, changeAddressState);
 
-// router.route('/users').get(protect, authorize('admin'), getAllUsers);
+router.route('/users').get(protect, authorize('admin'), getAllUsers);
 
-// router.get('/me', protect, getMe, factory.getSingleOne(User));
 // router.patch('/me/update', uploadImage.single('photo'), protect, updateMe);
 // router.delete('/me/delete', protect, deleteMe);
 

@@ -2,6 +2,7 @@ const Cart = require('../models/Cart');
 const User = require('../models/User');
 const Product = require('../models/Product');
 const asyncHandler = require('../middleware/async');
+const factory = require('./handlerFactory');
 
 exports.saveCartToDb = asyncHandler(async (req, res, next) => {
   const {
@@ -150,3 +151,5 @@ exports.deleteAddressFromDb = asyncHandler(async (req, res, next) => {
     },
   });
 });
+
+exports.getAllUsers = factory.getAll(User);

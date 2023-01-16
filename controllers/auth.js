@@ -234,3 +234,19 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
   existedUser.password = undefined;
   createSendToken(existedUser._id, existedUser, 200, res);
 });
+
+exports.getMe = asyncHandler(async (req, res, next) => {
+  const { user } = req;
+
+  const usr = await User.findById(user.id);
+  if (!usr) return next(new AppError('User was not found', 400));
+
+  return res.json({
+    status: 'success',
+    data: {
+      data: {
+        user: usr,
+      },
+    },
+  });
+});

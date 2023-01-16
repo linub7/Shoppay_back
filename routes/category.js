@@ -14,12 +14,12 @@ const AppError = require('../utils/AppError');
 
 const router = express.Router();
 
-// router.param('id', (req, res, next, val) => {
-//   if (!isValidObjectId(val)) {
-//     return next(new AppError('Please provide a valid id', 400));
-//   }
-//   next();
-// });
+router.param('id', (req, res, next, val) => {
+  if (!isValidObjectId(val)) {
+    return next(new AppError('Please provide a valid id', 400));
+  }
+  next();
+});
 
 router
   .route('/categories')
@@ -27,7 +27,7 @@ router
   .post(protect, authorize('admin'), createCategory);
 
 router
-  .route('/categories/:slug')
+  .route('/categories/:id')
   .get(protect, authorize('admin'), getSingleCategory)
   .patch(protect, authorize('admin'), updateCategory)
   .delete(protect, authorize('admin'), deleteCategory);

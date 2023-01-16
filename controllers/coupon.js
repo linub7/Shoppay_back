@@ -69,3 +69,9 @@ exports.applyCoupon = asyncHandler(async (req, res, next) => {
     },
   });
 });
+
+exports.getSingleCoupon = factory.getSingleOne(Coupon);
+
+exports.updateCoupon = factory.updateOne(Coupon);
+
+exports.deleteCoupon = factory.deleteOne(Coupon);

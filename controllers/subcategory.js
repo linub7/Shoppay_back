@@ -38,7 +38,7 @@ exports.createSubCategory = asyncHandler(async (req, res, next) => {
   return res.status(201).json({
     status: 'success',
     data: {
-      data: newSubCategory,
+      subCategory: newSubCategory,
     },
   });
 });

@@ -11,7 +11,7 @@ const CouponSchema = new Schema(
       uppercase: true,
       required: true,
       minlength: 4,
-      maxlength: 10,
+      maxlength: 20,
     },
     startDate: {
       type: String,

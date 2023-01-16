@@ -5,14 +5,12 @@ const AppError = require('../utils/AppError');
 exports.deleteOne = (Model) =>
   asyncHandler(async (req, res, next) => {
     const {
-      params: { slug },
+      params: { id },
     } = req;
-    const doc = await Model.findOneAndDelete({ slug });
+    const doc = await Model.findOneAndDelete({ _id: id });
 
     if (!doc) {
-      return next(
-        new AppError(`Document with ${slug} was not found in db`, 404)
-      );
+      return next(new AppError(`Document with ${id} was not found in db`, 404));
     }
 
     return res.json({
@@ -24,10 +22,10 @@ exports.deleteOne = (Model) =>
 exports.updateOne = (Model) =>
   asyncHandler(async (req, res, next) => {
     const {
-      params: { slug },
+      params: { id },
       body,
     } = req;
-    const updatedDoc = await Model.findOneAndUpdate({ slug }, body, {
+    const updatedDoc = await Model.findOneAndUpdate({ _id: id }, body, {
       new: true,
       runValidators: true,
     });
@@ -45,20 +43,18 @@ exports.updateOne = (Model) =>
 exports.getSingleOne = (Model, populateOptions) =>
   asyncHandler(async (req, res, next) => {
     const {
-      params: { slug },
+      params: { id },
     } = req;
 
-    let query = Model.findOne({ slug });
+    let query = Model.findOne({ _id: id });
 
     if (populateOptions)
-      query = Model.findOne({ slug }).populate(populateOptions);
+      query = Model.findOne({ _id: id }).populate(populateOptions);
 
     const doc = await query;
 
     if (!doc) {
-      return next(
-        new AppError(`Document with ${slug} was not found in db`, 404)
-      );
+      return next(new AppError(`Document with ${id} was not found in db`, 404));
     }
     return res.json({
       status: 'success',

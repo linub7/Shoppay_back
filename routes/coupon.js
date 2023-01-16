@@ -4,6 +4,9 @@ const {
   createCoupon,
   getAllCoupons,
   applyCoupon,
+  getSingleCoupon,
+  updateCoupon,
+  deleteCoupon,
 } = require('../controllers/coupon');
 
 const { protect, getMe, authorize } = require('../middleware/auth');
@@ -20,15 +23,15 @@ router.param('id', (req, res, next, val) => {
 
 router
   .route('/coupons')
-  .get(getAllCoupons)
+  .get(protect, authorize('admin'), getAllCoupons)
   .post(protect, authorize('admin'), createCoupon);
 
 router.post('/coupons/apply-coupon', protect, applyCoupon);
 
-// router
-//   .route('/categories/:id')
-//   .get(getSingleCategory)
-//   .patch(protect, authorize('admin'), updateCategory)
-//   .delete(protect, authorize('admin'), deleteCategory);
+router
+  .route('/coupons/:id')
+  .get(getSingleCoupon)
+  .patch(protect, authorize('admin'), updateCoupon)
+  .delete(protect, authorize('admin'), deleteCoupon);
 
 module.exports = router;

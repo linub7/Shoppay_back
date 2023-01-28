@@ -19,8 +19,8 @@ exports.createSubCategory = asyncHandler(async (req, res, next) => {
 
   if (!parent)
     return next(new AppError('Please enter a parent category.', 400));
-
-  const isSubCategoryExisted = await SubCategory.findOne({ name });
+  //TODO: solve slug unique in every subs
+  const isSubCategoryExisted = await SubCategory.findOne({ name, parent });
 
   if (isSubCategoryExisted)
     return next(new AppError('Category is already created', 400));
@@ -42,3 +42,22 @@ exports.createSubCategory = asyncHandler(async (req, res, next) => {
     },
   });
 });
+
+exports.getSubCategoriesBasedOneCategory = asyncHandler(
+  async (req, res, next) => {
+    const {
+      params: { categoryId },
+    } = req;
+
+    const subCategories = await SubCategory.find({ parent: categoryId }).select(
+      'name'
+    );
+
+    return res.json({
+      status: 'success',
+      data: {
+        data: subCategories,
+      },
+    });
+  }
+);

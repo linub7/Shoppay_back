@@ -6,13 +6,15 @@ const factory = require('./handlerFactory');
 exports.getAllProducts = factory.getAll(Product);
 
 exports.getSingleProduct = asyncHandler(async (req, res, next) => {
-  const {
-    params: { slug },
+  let {
+    params: { id },
     query: { style, size },
   } = req;
-  const product = await Product.findOne({ slug });
+  style = style || 0;
+  size = size || 0;
+  const product = await Product.findOne({ id });
   if (!product)
-    return next(new AppError(`Product with ${slug} was not found`, 404));
+    return next(new AppError(`Product with ${id} was not found`, 404));
   const discount = product.subProducts[style].discount;
   const priceBefore = product.subProducts[style].sizes[size].price;
   const price = discount ? priceBefore - priceBefore / discount : priceBefore;
@@ -27,6 +29,8 @@ exports.getSingleProduct = asyncHandler(async (req, res, next) => {
         slug: product.slug,
         sku: product.subProducts[style].sku,
         brand: product.brand,
+        category: product?.category,
+        subCategories: product?.subCategories,
         shipping: product.shipping,
         images: product.subProducts[style].images,
         color: product.subProducts[style].color,
@@ -42,5 +46,15 @@ exports.getSingleProduct = asyncHandler(async (req, res, next) => {
 exports.updateProduct = factory.updateOne(Product);
 
 exports.deleteProduct = factory.deleteOne(Product);
+
+exports.getProductsNameSub = asyncHandler(async (req, res, next) => {
+  const products = await Product.find({}).select('name subProducts');
+  return res.json({
+    status: 'success',
+    data: {
+      data: products,
+    },
+  });
+});
 
 exports.createProduct = asyncHandler(async (req, res, next) => {});

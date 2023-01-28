@@ -43,7 +43,7 @@ router.patch('/auth/update-my-password', protect, updatePassword);
 
 router.post('/auth/signup', signup);
 router.post('/auth/signin', signin);
-router.get('/auth/signout', protect, signoutUser);
+router.get('/auth/signout', signoutUser);
 router.get('/auth/me', protect, getMe);
 
 router

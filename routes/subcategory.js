@@ -6,6 +6,7 @@ const {
   getSingleSubCategory,
   updateSubCategory,
   deleteSubCategory,
+  getSubCategoriesBasedOneCategory,
 } = require('../controllers/subcategory');
 const factory = require('../controllers/handlerFactory');
 
@@ -21,10 +22,21 @@ router.param('id', (req, res, next, val) => {
   next();
 });
 
+router.param('categoryId', (req, res, next, val) => {
+  if (!isValidObjectId(val)) {
+    return next(new AppError('Please provide a valid id', 400));
+  }
+  next();
+});
+
 router
   .route('/subcategories')
   .get(getAllSubCategories)
   .post(protect, authorize('admin'), createSubCategory);
+
+router
+  .route('/subcategories/categories/:categoryId')
+  .get(protect, authorize('admin'), getSubCategoriesBasedOneCategory);
 
 router
   .route('/subcategories/:id')

@@ -1,10 +1,10 @@
 const cloudinary = require('../cloud');
 
-exports.uploadImageToCloudinary = async (filePath, folderPath) => {
+exports.uploadImageToCloudinary = async (filePath, path) => {
   const { secure_url: url, public_id } = await cloudinary.uploader.upload(
     filePath,
     {
-      folder: folderPath,
+      folder: path,
     }
   );
   return { url, public_id };
@@ -16,3 +16,19 @@ exports.destroyImageFromCloudinary = async (public_id) => {
 
   return result;
 };
+
+/**
+ * exports.uploadImageToCloudinary = async (filePath) => {
+  const { secure_url: url, public_id } = await cloudinary.uploader.upload(
+    filePath,
+    // image optimization for detect face
+    {
+      gravity: 'face',
+      height: 500,
+      width: 500,
+      crop: 'thumb',
+    }
+  );
+  return { url, public_id };
+};
+ */

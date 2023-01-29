@@ -101,14 +101,28 @@ const ProductSchema = new Schema(
     subProducts: [
       {
         sku: String,
-        images: [],
-        descriptionImages: [],
+        images: [
+          {
+            type: Object,
+            url: String,
+            public_id: String,
+          },
+        ],
+        descriptionImages: [
+          {
+            type: Object,
+            url: String,
+            public_id: String,
+          },
+        ],
         color: {
           color: {
             type: String,
           },
           image: {
-            type: String,
+            type: Object,
+            url: String,
+            public_id: String,
           },
         },
         sizes: [

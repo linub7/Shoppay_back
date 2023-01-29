@@ -57,4 +57,79 @@ exports.getProductsNameSub = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.createProduct = asyncHandler(async (req, res, next) => {});
+exports.uploadProductImages = asyncHandler(async (req, res, next) => {});
+
+exports.createProduct = asyncHandler(async (req, res, next) => {
+  const {
+    body: {
+      parent,
+      sku,
+      color,
+      images,
+      sizes,
+      discount,
+      name,
+      description,
+      brand,
+      category,
+      subCategories,
+      details,
+      questions,
+    },
+    user,
+  } = req;
+
+  if (parent) {
+    const existedProduct = await Product.findById(parent);
+    if (!existedProduct)
+      return next(new AppError('Product was not found', 404));
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      parent,
+      {
+        $push: {
+          subProducts: {
+            sku,
+            images,
+            color,
+            sizes,
+            discount,
+          },
+        },
+      },
+      { new: true, runValidators: true }
+    );
+    return res.json({
+      status: 'success',
+      data: {
+        data: 'product is updated successfully',
+      },
+    });
+  } else {
+    const newProduct = await Product.create({
+      name,
+      description,
+      brand,
+      user: user._id,
+      category,
+      subCategories,
+      details,
+      questions,
+      subProducts: [
+        {
+          sku,
+          images,
+          color,
+          sizes,
+          discount,
+        },
+      ],
+    });
+    return res.json({
+      status: 'success',
+      data: {
+        data: 'Product is created successfully.',
+      },
+    });
+  }
+});

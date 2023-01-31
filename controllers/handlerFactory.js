@@ -25,6 +25,14 @@ exports.updateOne = (Model) =>
       params: { id },
       body,
     } = req;
+    if (body?.role === 'admin') {
+      return next(
+        new AppError(
+          `You can not change a user role to admin, please select sub-admin or user.`,
+          401
+        )
+      );
+    }
     const updatedDoc = await Model.findOneAndUpdate({ _id: id }, body, {
       new: true,
       runValidators: true,

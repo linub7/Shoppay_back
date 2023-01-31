@@ -13,8 +13,8 @@ const factory = require('../controllers/handlerFactory');
 const {
   getAllUsers,
   getSingleUser,
-  updateUser,
-  deleteUser,
+  updateUserByAdmin,
+  deleteUserByAdmin,
   updateMe,
   deleteMe,
   saveCartToDb,
@@ -61,10 +61,10 @@ router.route('/users').get(protect, authorize('admin'), getAllUsers);
 // router.patch('/me/update', uploadImage.single('photo'), protect, updateMe);
 // router.delete('/me/delete', protect, deleteMe);
 
-// router
-//   .route('/users/:id')
-//   .get(protect, authorize('admin'), getSingleUser)
-//   .patch(protect, authorize('admin'), updateUser)
-//   .delete(protect, authorize('admin'), deleteUser);
+router
+  .route('/users/:id')
+  // .get(protect, authorize('admin'), getSingleUser)
+  .patch(protect, authorize('admin'), updateUserByAdmin)
+  .delete(protect, authorize('admin'), deleteUserByAdmin);
 
 module.exports = router;

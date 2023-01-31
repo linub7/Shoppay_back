@@ -153,3 +153,7 @@ exports.deleteAddressFromDb = asyncHandler(async (req, res, next) => {
 });
 
 exports.getAllUsers = factory.getAll(User);
+
+exports.updateUserByAdmin = factory.updateOne(User);
+
+exports.deleteUserByAdmin = factory.deleteOne(User);

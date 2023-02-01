@@ -19,7 +19,9 @@ const OrderSchema = new Schema(
           type: String,
         },
         image: {
-          type: String,
+          type: Object,
+          url: String,
+          public_id: String,
         },
         size: {
           type: String,

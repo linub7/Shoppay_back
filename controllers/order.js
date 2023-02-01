@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Order = require('../models/Order');
+const factory = require('./handlerFactory');
 const asyncHandler = require('../middleware/async');
 const AppError = require('../utils/AppError');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -97,5 +98,19 @@ exports.payWithStripe = asyncHandler(async (req, res, next) => {
   await order.save();
   return res.json({
     status: 'success',
+  });
+});
+
+exports.getAllOrders = asyncHandler(async (req, res, next) => {
+  const orders = await Order.find({})
+    .populate('user', 'name email')
+    .populate('products', 'product name')
+    .sort('-createdAt');
+
+  res.json({
+    status: 'success',
+    data: {
+      data: orders,
+    },
   });
 });

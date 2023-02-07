@@ -92,6 +92,12 @@ const UserSchema = new Schema(
         },
       },
     ],
+    wishlist: [
+      {
+        product: { type: Schema.Types.ObjectId, ref: 'Product' },
+        style: { type: String },
+      },
+    ],
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,

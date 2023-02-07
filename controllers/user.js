@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Product = require('../models/Product');
 const asyncHandler = require('../middleware/async');
 const factory = require('./handlerFactory');
+const { isValidObjectId } = require('mongoose');
 
 exports.saveCartToDb = asyncHandler(async (req, res, next) => {
   const {
@@ -157,3 +158,43 @@ exports.getAllUsers = factory.getAll(User);
 exports.updateUserByAdmin = factory.updateOne(User);
 
 exports.deleteUserByAdmin = factory.deleteOne(User);
+
+exports.addToWishlist = asyncHandler(async (req, res, next) => {
+  const {
+    body: { productId, style },
+    user,
+  } = req;
+
+  if (!isValidObjectId(productId))
+    return next(new AppError('Please provide a valid id', 400));
+
+  if (!style) return next(new AppError('Please enter a style', 400));
+
+  await User.findByIdAndUpdate(
+    user._id,
+    {
+      $addToSet: {
+        wishlist: { product: productId, style },
+      },
+    },
+    { new: true, runValidators: true }
+  );
+
+  return res.json({
+    status: 'success',
+    message: 'Added to your wishlist ✅',
+  });
+});
+
+exports.getWishlists = asyncHandler(async (req, res, next) => {
+  const { user } = req;
+
+  const wishlistProducts = await User.findById(user._id).populate('wishlist');
+
+  return res.json({
+    status: 'success',
+    data: {
+      data: wishlistProducts,
+    },
+  });
+});

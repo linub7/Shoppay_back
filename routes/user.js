@@ -22,6 +22,8 @@ const {
   saveAddressToDb,
   changeAddressState,
   deleteAddressFromDb,
+  getWishlists,
+  addToWishlist,
 } = require('../controllers/user');
 const { protect, authorize } = require('../middleware/auth');
 const User = require('../models/User');
@@ -50,6 +52,11 @@ router
   .route('/user/cart')
   .get(protect, getUserCart)
   .post(protect, saveCartToDb);
+
+router
+  .route('/user/wishlist')
+  .get(protect, getWishlists)
+  .post(protect, addToWishlist);
 
 router.route('/user/address/:addressId').delete(protect, deleteAddressFromDb);
 router.route('/user/address').post(protect, saveAddressToDb);

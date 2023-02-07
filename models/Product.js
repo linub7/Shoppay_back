@@ -3,35 +3,6 @@ const slugify = require('slugify');
 
 const { Schema } = mongoose;
 
-const ReviewSchema = new Schema({
-  reviewBy: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-  rating: {
-    type: Number,
-    required: true,
-    default: 0,
-  },
-  review: {
-    type: String,
-    required: true,
-  },
-  size: {
-    type: String,
-  },
-  style: {
-    color: String,
-    image: String,
-  },
-  fit: {
-    type: String,
-  },
-  images: [],
-  likes: [],
-});
-
 const ProductSchema = new Schema(
   {
     name: {
@@ -78,7 +49,12 @@ const ProductSchema = new Schema(
         answer: String,
       },
     ],
-    reviews: [ReviewSchema],
+    reviews: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Review',
+      },
+    ],
     refundPolicy: {
       type: String,
       default: '30 days',

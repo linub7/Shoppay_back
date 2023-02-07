@@ -1,4 +1,6 @@
+const { isValidObjectId } = require('mongoose');
 const Product = require('../models/Product');
+const Review = require('../models/Review');
 const asyncHandler = require('../middleware/async');
 const AppError = require('../utils/AppError');
 const factory = require('./handlerFactory');
@@ -129,6 +131,87 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
       status: 'success',
       data: {
         data: 'Product is created successfully.',
+      },
+    });
+  }
+});
+
+exports.addReview = asyncHandler(async (req, res, next) => {
+  const {
+    params: { productId },
+    body: { rating, review, size, style, fit, images },
+    user,
+  } = req;
+
+  if (!isValidObjectId(productId))
+    return next(new AppError('Please provide a valid id', 400));
+
+  const product = await Product.findById(productId).populate(
+    'reviews',
+    'reviewBy'
+  );
+
+  if (!product) return next(new AppError('Product was not found', 404));
+
+  const isAlreadyWroteReview = product?.reviews?.find(
+    (review) => review?.reviewBy?.toString() === user?._id?.toString()
+  );
+  if (isAlreadyWroteReview) {
+    await Product.findOneAndUpdate(
+      {
+        _id: productId,
+        'reviews._id': isAlreadyWroteReview._id,
+      },
+      {
+        $set: {
+          'reviews.$.review': review,
+          'reviews.$.fit': fit,
+          'reviews.$.images': images,
+          'reviews.$.size': size,
+          'reviews.$.style': style,
+          'reviews.$.rating': rating,
+        },
+      },
+      { new: true, runValidators: true }
+    );
+    const updatedProduct = await Product.findById(productId).populate(
+      'reviews'
+    );
+    updatedProduct.numReviews = updatedProduct?.reviews?.length;
+    updatedProduct.rating =
+      updatedProduct?.reviews?.reduce((a, r) => a + r.rating, 0) /
+      updatedProduct.reviews?.length;
+    await updatedProduct.save();
+
+    return res.json({
+      status: 'success',
+      data: {
+        data: updatedProduct.reviews.reverse(),
+      },
+    });
+  } else {
+    const newReview = await Review.create({
+      reviewBy: user._id,
+      fit,
+      images,
+      rating,
+      review,
+      size,
+      style,
+    });
+
+    product?.reviews?.push(newReview);
+    product.numReviews = product.reviews.length;
+    product.rating =
+      product.reviews.reduce((a, r) => a + r.rating, 0) /
+      product.reviews.length;
+
+    await product?.save();
+
+    return res.json({
+      status: 'success',
+      data: {
+        data: product.reviews.reverse(),
       },
     });
   }

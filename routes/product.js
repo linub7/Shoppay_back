@@ -6,6 +6,7 @@ const {
   updateProduct,
   deleteProduct,
   getProductsNameSub,
+  addReview,
 } = require('../controllers/product');
 const factory = require('../controllers/handlerFactory');
 
@@ -39,5 +40,12 @@ router
   .get(getSingleProduct)
   .patch(protect, authorize('admin'), updateProduct)
   .delete(protect, authorize('admin'), deleteProduct);
+
+router.patch(
+  '/products/:productId/reviews',
+  protect,
+  authorize('user'),
+  addReview
+);
 
 module.exports = router;

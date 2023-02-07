@@ -2,6 +2,7 @@ const express = require('express');
 const {
   uploadMultipleImages,
   uploadColorImage,
+  uploadProductReviewMultiImage,
 } = require('../controllers/uploads');
 
 const { protect, authorize } = require('../middleware/auth');
@@ -15,6 +16,15 @@ router
     protect,
     authorize('admin'),
     uploadImage.array('imageInputFile'),
+    uploadMultipleImages
+  );
+
+router
+  .route('/upload/images/products/reviews')
+  .post(
+    protect,
+    authorize('admin'),
+    uploadImage.array('file'),
     uploadMultipleImages
   );
 

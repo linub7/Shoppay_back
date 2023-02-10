@@ -114,3 +114,18 @@ exports.getAllOrders = asyncHandler(async (req, res, next) => {
     },
   });
 });
+
+exports.getAllUserOrders = asyncHandler(async (req, res, next) => {
+  const { user: usr } = req;
+
+  const orders = await Order.find({ user: usr._id })
+    .populate('products')
+    .sort('-createdAt');
+
+  return res.json({
+    status: 'success',
+    data: {
+      data: orders,
+    },
+  });
+});

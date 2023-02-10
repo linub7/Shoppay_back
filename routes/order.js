@@ -5,6 +5,7 @@ const {
   getOrder,
   payWithStripe,
   getAllOrders,
+  getAllUserOrders,
 } = require('../controllers/order');
 const factory = require('../controllers/handlerFactory');
 
@@ -27,5 +28,7 @@ router.route('/orders/:id').get(protect, getOrder);
 router.post('/orders/:id/pay-with-stripe', protect, payWithStripe);
 
 router.post('/orders/place-order', protect, placeOrder);
+
+router.route('/user/orders').get(protect, getAllUserOrders);
 
 module.exports = router;

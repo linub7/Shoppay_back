@@ -244,9 +244,7 @@ exports.getMe = asyncHandler(async (req, res, next) => {
   return res.json({
     status: 'success',
     data: {
-      data: {
-        user: usr,
-      },
+      data: usr,
     },
   });
 });

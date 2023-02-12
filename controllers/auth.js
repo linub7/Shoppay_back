@@ -201,13 +201,13 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 
 exports.updatePassword = asyncHandler(async (req, res, next) => {
   const {
-    body: { oldPassword, password, passwordConfirm },
+    body: { currentPassword, password, passwordConfirm },
     user,
   } = req;
-  if (!oldPassword || !password || !passwordConfirm)
+  if (!currentPassword || !password || !passwordConfirm)
     return next(
       new AppError(
-        `Please provide an old password and new password and passwordConfirm`,
+        `Please provide current password and new password and passwordConfirm`,
         400
       )
     );
@@ -218,7 +218,7 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
 
   // 2) Check if the posted current password is correct
   const isCorrect = await existedUser.correctPassword(
-    oldPassword,
+    currentPassword,
     existedUser.password
   );
   if (!isCorrect)

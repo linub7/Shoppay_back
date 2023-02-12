@@ -4,6 +4,7 @@ const Product = require('../models/Product');
 const asyncHandler = require('../middleware/async');
 const factory = require('./handlerFactory');
 const { isValidObjectId } = require('mongoose');
+const AppError = require('../utils/AppError');
 
 exports.saveCartToDb = asyncHandler(async (req, res, next) => {
   const {
@@ -195,6 +196,31 @@ exports.getWishlists = asyncHandler(async (req, res, next) => {
     status: 'success',
     data: {
       data: wishlistProducts,
+    },
+  });
+});
+
+exports.setUserPaymentMethod = asyncHandler(async (req, res, next) => {
+  const {
+    user,
+    body: { defaultPaymentMethod },
+  } = req;
+
+  if (!defaultPaymentMethod)
+    return next(new AppError('Please enter a valid payment method', 400));
+
+  const updatedUser = await User.findByIdAndUpdate(
+    user._id,
+    {
+      defaultPaymentMethod,
+    },
+    { new: true, runValidators: true }
+  );
+
+  return res.json({
+    status: 'success',
+    data: {
+      data: updatedUser,
     },
   });
 });

@@ -24,6 +24,7 @@ const {
   deleteAddressFromDb,
   getWishlists,
   addToWishlist,
+  setUserPaymentMethod,
 } = require('../controllers/user');
 const { protect, authorize } = require('../middleware/auth');
 const User = require('../models/User');
@@ -60,6 +61,8 @@ router
 
 router.route('/user/address/:addressId').delete(protect, deleteAddressFromDb);
 router.route('/user/address').post(protect, saveAddressToDb);
+
+router.route('/user/payment-method').put(protect, setUserPaymentMethod);
 
 router.route('/user/manage-address').patch(protect, changeAddressState);
 

@@ -4,6 +4,7 @@ const Review = require('../models/Review');
 const asyncHandler = require('../middleware/async');
 const AppError = require('../utils/AppError');
 const factory = require('./handlerFactory');
+const { filterArray, removeDuplicates } = require('../utils/arrayUtils');
 
 exports.getAllProducts = factory.getAll(Product);
 
@@ -215,4 +216,24 @@ exports.addReview = asyncHandler(async (req, res, next) => {
       },
     });
   }
+});
+
+exports.getProductsDetails = asyncHandler(async (req, res, next) => {
+  const colors = await Product.find({}).distinct('subProducts.color.color');
+  const brandsDb = await Product.find({}).distinct('brand');
+  const sizes = await Product.find({}).distinct('subProducts.sizes.size');
+  const details = await Product.find({}).distinct('details');
+  const stylesDb = filterArray(details, 'Style');
+  const patternTypeDb = filterArray(details, 'Pattern Type');
+  const materialDb = filterArray(details, 'Material');
+  const styles = removeDuplicates(stylesDb);
+  const patternType = removeDuplicates(patternTypeDb);
+  const material = removeDuplicates(materialDb);
+
+  return res.json({
+    status: 'success',
+    data: {
+      data: colors,
+    },
+  });
 });

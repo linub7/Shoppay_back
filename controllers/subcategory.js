@@ -4,7 +4,7 @@ const asyncHandler = require('../middleware/async');
 const AppError = require('../utils/AppError');
 const factory = require('./handlerFactory');
 
-exports.getAllSubCategories = factory.getAll(SubCategory);
+exports.getAllSubCategories = factory.getAll(SubCategory, 'parent');
 
 exports.getSingleSubCategory = factory.getSingleOne(SubCategory, 'parent');
 

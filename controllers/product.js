@@ -15,7 +15,7 @@ exports.getSingleProduct = asyncHandler(async (req, res, next) => {
   } = req;
   style = style || 0;
   size = size || 0;
-  const product = await Product.findOne({ id });
+  const product = await Product.findById(id);
   if (!product)
     return next(new AppError(`Product with ${id} was not found`, 404));
   const discount = product.subProducts[style].discount;
@@ -229,11 +229,22 @@ exports.getProductsDetails = asyncHandler(async (req, res, next) => {
   const styles = removeDuplicates(stylesDb);
   const patternType = removeDuplicates(patternTypeDb);
   const material = removeDuplicates(materialDb);
+  const brands = removeDuplicates(brandsDb);
+
+  const payload = {
+    colors,
+    brands,
+    sizes,
+    details,
+    styles,
+    patternType,
+    material,
+  };
 
   return res.json({
     status: 'success',
     data: {
-      data: colors,
+      data: payload,
     },
   });
 });

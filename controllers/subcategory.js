@@ -23,12 +23,12 @@ exports.createSubCategory = asyncHandler(async (req, res, next) => {
   const isSubCategoryExisted = await SubCategory.findOne({ name, parent });
 
   if (isSubCategoryExisted)
-    return next(new AppError('Category is already created', 400));
+    return next(new AppError('SubCategory is already created', 400));
 
   const isCategoryExisted = await Category.findById(parent);
 
   if (!isCategoryExisted)
-    return next(new AppError(`Category with ${parent} was not found`, 404));
+    return next(new AppError(`SubCategory with ${parent} was not found`, 404));
 
   const newSubCategory = await SubCategory.create({
     name,

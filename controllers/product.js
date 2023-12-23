@@ -1,10 +1,106 @@
 const { isValidObjectId } = require('mongoose');
+
 const Product = require('../models/Product');
 const Review = require('../models/Review');
 const asyncHandler = require('../middleware/async');
 const AppError = require('../utils/AppError');
 const factory = require('./handlerFactory');
-const { filterArray, removeDuplicates } = require('../utils/arrayUtils');
+const {
+  filterArray,
+  removeDuplicates,
+  createRegex,
+} = require('../utils/arrayUtils');
+
+exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
+  const {
+    query: { searchTerm, category, brand, style, size },
+  } = req;
+  if (searchTerm && searchTerm?.length < 2)
+    return next(new AppError('Please enter some proper key to search', 400));
+
+  console.log({ category, searchTerm, brand, style, size });
+
+  let categoryFilter = {};
+  let brandFilter = {};
+  let styleFilter = {};
+  let sizeFilter = {};
+
+  if (category !== '' && category !== undefined && !isValidObjectId(category))
+    return next(new AppError('Please enter correct category', 400));
+
+  const search =
+    searchTerm && searchTerm !== ''
+      ? {
+          name: {
+            $regex: searchTerm,
+            $options: 'i',
+          },
+        }
+      : {};
+
+  if (category === undefined || category === '') {
+    categoryFilter = {};
+  } else {
+    categoryFilter = category && category !== '' ? { category } : {};
+  }
+  console.log({ categoryFilter });
+
+  if (brand === undefined || brand === '') {
+    brandFilter = {};
+  } else {
+    brandFilter = brand && brand !== '' ? { brand } : {};
+  }
+
+  // style query
+  if (style === undefined || style === '') {
+    styleFilter = {};
+  } else {
+    const styleQuery = style?.split('_');
+    const styleRegex = `^${styleQuery[0]}`;
+    const styleSearchRegex = createRegex(styleQuery, styleRegex);
+    styleFilter =
+      style && style !== ''
+        ? {
+            'details.value': {
+              $regex: styleSearchRegex,
+              $options: 'i',
+            },
+          }
+        : {};
+  }
+
+  // size query
+  if (size === undefined || size === '') {
+    sizeFilter = {};
+  } else {
+    const sizeQuery = size?.split('_');
+    const sizeRegex = `^${sizeQuery[0]}`;
+    const sizeSearchRegex = createRegex(sizeQuery, sizeRegex);
+    sizeFilter =
+      size && size !== ''
+        ? {
+            'subProducts.sizes.size': {
+              $regex: sizeSearchRegex,
+              $options: 'i',
+            },
+          }
+        : {};
+  }
+
+  const searchedProducts = await Product.find({
+    ...search,
+    ...categoryFilter,
+    ...brandFilter,
+    ...styleFilter,
+    ...sizeFilter,
+  });
+
+  return res.json({
+    status: 'success',
+    result: searchedProducts?.length,
+    data: searchedProducts,
+  });
+});
 
 exports.getAllProducts = factory.getAll(Product);
 
@@ -219,10 +315,30 @@ exports.addReview = asyncHandler(async (req, res, next) => {
 });
 
 exports.getProductsDetails = asyncHandler(async (req, res, next) => {
-  const colors = await Product.find({}).distinct('subProducts.color.color');
-  const brandsDb = await Product.find({}).distinct('brand');
-  const sizes = await Product.find({}).distinct('subProducts.sizes.size');
-  const details = await Product.find({}).distinct('details');
+  const {
+    query: { category },
+  } = req;
+
+  let categoryFilter = {};
+  if (category !== '' && !isValidObjectId(category))
+    return next(new AppError('Please enter correct category', 400));
+
+  if (category === undefined || category === '') {
+    categoryFilter = {};
+  } else {
+    categoryFilter = category && category !== '' ? { category } : {};
+  }
+
+  const colors = await Product.find({ ...categoryFilter }).distinct(
+    'subProducts.color.color'
+  );
+  const brandsDb = await Product.find({
+    ...categoryFilter,
+  }).distinct('brand');
+  const sizes = await Product.find({ ...categoryFilter }).distinct(
+    'subProducts.sizes.size'
+  );
+  const details = await Product.find({ ...categoryFilter }).distinct('details');
   const stylesDb = filterArray(details, 'Style');
   const patternTypeDb = filterArray(details, 'Pattern Type');
   const materialDb = filterArray(details, 'Material');

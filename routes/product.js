@@ -8,6 +8,7 @@ const {
   getProductsNameSub,
   addReview,
   getProductsDetails,
+  getSearchedProducts,
 } = require('../controllers/product');
 const factory = require('../controllers/handlerFactory');
 
@@ -37,6 +38,8 @@ router.get(
 );
 
 router.get('/products/details', getProductsDetails);
+
+router.get('/products/search', getSearchedProducts);
 
 router
   .route('/products/:id')

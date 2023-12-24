@@ -13,17 +13,18 @@ const {
 
 exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
   const {
-    query: { searchTerm, category, brand, style, size },
+    query: { searchTerm, category, brand, style, size, color },
   } = req;
   if (searchTerm && searchTerm?.length < 2)
     return next(new AppError('Please enter some proper key to search', 400));
 
-  console.log({ category, searchTerm, brand, style, size });
+  console.log({ category, searchTerm, brand, style, size, color });
 
   let categoryFilter = {};
   let brandFilter = {};
   let styleFilter = {};
   let sizeFilter = {};
+  let colorFilter = {};
 
   if (category !== '' && category !== undefined && !isValidObjectId(category))
     return next(new AppError('Please enter correct category', 400));
@@ -43,12 +44,22 @@ exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
   } else {
     categoryFilter = category && category !== '' ? { category } : {};
   }
-  console.log({ categoryFilter });
 
   if (brand === undefined || brand === '') {
     brandFilter = {};
   } else {
-    brandFilter = brand && brand !== '' ? { brand } : {};
+    const brandQuery = brand?.split('_');
+    const brandRegex = `^${brandQuery[0]}`;
+    const brandSearchRegex = createRegex(brandQuery, brandRegex);
+    brandFilter =
+      brand && brand !== ''
+        ? {
+            brand: {
+              $regex: brandSearchRegex,
+              $options: 'i',
+            },
+          }
+        : {};
   }
 
   // style query
@@ -87,12 +98,37 @@ exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
         : {};
   }
 
+  // color query
+  if (color === undefined || color === '') {
+    colorFilter = {};
+  } else {
+    const colorQuery = color?.split('_');
+    let tmpColorQuery = [];
+    for (const item of colorQuery) {
+      const newItem = item?.slice(0, 0) + '#' + item?.slice(0);
+      tmpColorQuery?.push(newItem);
+    }
+
+    const colorRegex = `^${tmpColorQuery[0]}`;
+    const colorSearchRegex = createRegex(tmpColorQuery, colorRegex);
+    colorFilter =
+      color && color !== ''
+        ? {
+            'subProducts.color.color': {
+              $regex: colorSearchRegex,
+              $options: 'i',
+            },
+          }
+        : {};
+  }
+
   const searchedProducts = await Product.find({
     ...search,
     ...categoryFilter,
     ...brandFilter,
     ...styleFilter,
     ...sizeFilter,
+    ...colorFilter,
   });
 
   return res.json({

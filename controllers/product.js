@@ -13,22 +13,45 @@ const {
 
 exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
   const {
-    query: { searchTerm, category, brand, style, size, color },
+    query: {
+      searchTerm,
+      category,
+      brand,
+      style,
+      size,
+      color,
+      pattern,
+      material,
+      gender,
+    },
   } = req;
   if (searchTerm && searchTerm?.length < 2)
     return next(new AppError('Please enter some proper key to search', 400));
 
-  console.log({ category, searchTerm, brand, style, size, color });
+  console.log({
+    category,
+    searchTerm,
+    brand,
+    style,
+    size,
+    color,
+    material,
+    gender,
+  });
 
   let categoryFilter = {};
   let brandFilter = {};
   let styleFilter = {};
   let sizeFilter = {};
   let colorFilter = {};
+  let patternFilter = {};
+  let materialFilter = {};
+  let genderFilter = {};
 
   if (category !== '' && category !== undefined && !isValidObjectId(category))
     return next(new AppError('Please enter correct category', 400));
 
+  // search term query
   const search =
     searchTerm && searchTerm !== ''
       ? {
@@ -39,12 +62,14 @@ exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
         }
       : {};
 
+  // category query
   if (category === undefined || category === '') {
     categoryFilter = {};
   } else {
     categoryFilter = category && category !== '' ? { category } : {};
   }
 
+  // brand query
   if (brand === undefined || brand === '') {
     brandFilter = {};
   } else {
@@ -122,6 +147,60 @@ exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
         : {};
   }
 
+  // pattern query
+  if (pattern === undefined || pattern === '') {
+    patternFilter = {};
+  } else {
+    const patternQuery = pattern?.split('_');
+    const patternRegex = `^${patternQuery[0]}`;
+    const patternSearchRegex = createRegex(patternQuery, patternRegex);
+    patternFilter =
+      pattern && pattern !== ''
+        ? {
+            'details.value': {
+              $regex: patternSearchRegex,
+              $options: 'i',
+            },
+          }
+        : {};
+  }
+
+  // material query
+  if (material === undefined || material === '') {
+    materialFilter = {};
+  } else {
+    const materialQuery = material?.split('_');
+    const materialRegex = `^${materialQuery[0]}`;
+    const materialSearchRegex = createRegex(materialQuery, materialRegex);
+    materialFilter =
+      material && material !== ''
+        ? {
+            'details.value': {
+              $regex: materialSearchRegex,
+              $options: 'i',
+            },
+          }
+        : {};
+  }
+
+  // gender query
+  if (gender === undefined || gender === '') {
+    genderFilter = {};
+  } else {
+    const genderQuery = gender?.split('_');
+    const genderRegex = `^${genderQuery[0]}`;
+    const genderSearchRegex = createRegex(genderQuery, genderRegex);
+    genderFilter =
+      gender && gender !== ''
+        ? {
+            'details.value': {
+              $regex: genderSearchRegex,
+              $options: 'i',
+            },
+          }
+        : {};
+  }
+
   const searchedProducts = await Product.find({
     ...search,
     ...categoryFilter,
@@ -129,6 +208,9 @@ exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
     ...styleFilter,
     ...sizeFilter,
     ...colorFilter,
+    ...patternFilter,
+    ...materialFilter,
+    ...genderFilter,
   });
 
   return res.json({

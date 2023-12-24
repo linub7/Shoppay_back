@@ -10,6 +10,7 @@ const {
   removeDuplicates,
   createRegex,
 } = require('../utils/arrayUtils');
+const { extractMinMax } = require('../utils/helpers');
 
 exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
   const {
@@ -23,20 +24,14 @@ exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
       pattern,
       material,
       gender,
+      price,
     },
   } = req;
   if (searchTerm && searchTerm?.length < 2)
     return next(new AppError('Please enter some proper key to search', 400));
 
   console.log({
-    category,
-    searchTerm,
-    brand,
-    style,
-    size,
-    color,
-    material,
-    gender,
+    price,
   });
 
   let categoryFilter = {};
@@ -47,6 +42,7 @@ exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
   let patternFilter = {};
   let materialFilter = {};
   let genderFilter = {};
+  let priceFilter = {};
 
   if (category !== '' && category !== undefined && !isValidObjectId(category))
     return next(new AppError('Please enter correct category', 400));
@@ -201,6 +197,37 @@ exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
         : {};
   }
 
+  // price query
+  if (price === undefined || price === '') {
+    priceFilter = {};
+  } else {
+    const { min, max } = extractMinMax(price);
+
+    priceFilter =
+      (min !== undefined || max !== undefined) && min === max
+        ? {
+            'subProducts.sizes.price': {
+              $gte: min,
+            },
+          }
+        : (min !== undefined || max !== undefined) &&
+          min === 0 &&
+          max !== undefined
+        ? {
+            'subProducts.sizes.price': {
+              $lte: max,
+            },
+          }
+        : min !== undefined && max !== undefined && max !== min
+        ? {
+            'subProducts.sizes.price': {
+              $gte: min,
+              $lte: max,
+            },
+          }
+        : {};
+  }
+
   const searchedProducts = await Product.find({
     ...search,
     ...categoryFilter,
@@ -211,6 +238,7 @@ exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
     ...patternFilter,
     ...materialFilter,
     ...genderFilter,
+    ...priceFilter,
   });
 
   return res.json({

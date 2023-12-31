@@ -25,14 +25,15 @@ exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
       material,
       gender,
       price,
+      shipping,
+      rating,
+      sort,
     },
   } = req;
   if (searchTerm && searchTerm?.length < 2)
     return next(new AppError('Please enter some proper key to search', 400));
 
-  console.log({
-    price,
-  });
+  console.log({ rating });
 
   let categoryFilter = {};
   let brandFilter = {};
@@ -43,6 +44,9 @@ exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
   let materialFilter = {};
   let genderFilter = {};
   let priceFilter = {};
+  let shippingFilter = {};
+  let ratingFilter = {};
+  let sortFilter = {};
 
   if (category !== '' && category !== undefined && !isValidObjectId(category))
     return next(new AppError('Please enter correct category', 400));
@@ -228,6 +232,62 @@ exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
         : {};
   }
 
+  // shipping query
+  if (shipping === undefined || shipping === '') {
+    shippingFilter = {};
+  } else {
+    shippingFilter = shipping === '0' ? { shipping: 0 } : {};
+  }
+
+  // rating query
+  if (rating === undefined || rating === '') {
+    ratingFilter = {};
+  } else {
+    ratingFilter =
+      rating && rating !== ''
+        ? {
+            rating: {
+              $gte: Number(rating),
+            },
+          }
+        : {};
+  }
+
+  // sort query
+  if (sort === undefined) {
+    sortFilter = {};
+  } else {
+    sortFilter =
+      sort === 'recommended'
+        ? {}
+        : sort === 'popular'
+        ? {
+            rating: -1,
+            'subProducts.sold': -1,
+          }
+        : sort === 'newest'
+        ? {
+            createdAt: -1,
+          }
+        : sort === 'top-selling'
+        ? {
+            'subProducts.sold': -1,
+          }
+        : sort === 'top-reviewed'
+        ? {
+            rating: -1,
+          }
+        : sort === 'price-high-to-low'
+        ? {
+            'subProducts.sizes.price': -1,
+          }
+        : sort === 'price-low-to-high'
+        ? {
+            'subProducts.sizes.price': 1,
+          }
+        : {};
+  }
+
   const searchedProducts = await Product.find({
     ...search,
     ...categoryFilter,
@@ -239,7 +299,9 @@ exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
     ...materialFilter,
     ...genderFilter,
     ...priceFilter,
-  });
+    ...shippingFilter,
+    ...ratingFilter,
+  }).sort(sortFilter);
 
   return res.json({
     status: 'success',

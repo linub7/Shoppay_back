@@ -28,12 +28,12 @@ exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
       shipping,
       rating,
       sort,
+      page,
+      limit,
     },
   } = req;
   if (searchTerm && searchTerm?.length < 2)
     return next(new AppError('Please enter some proper key to search', 400));
-
-  console.log({ rating });
 
   let categoryFilter = {};
   let brandFilter = {};
@@ -288,6 +288,25 @@ exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
         : {};
   }
 
+  const pageQuery = parseInt(page, 10) || 1;
+  const limitQuery = parseInt(limit, 10) || 10;
+  const startIndex = (pageQuery - 1) * limitQuery;
+
+  const productsCount = await Product.countDocuments({
+    ...search,
+    ...categoryFilter,
+    ...brandFilter,
+    ...styleFilter,
+    ...sizeFilter,
+    ...colorFilter,
+    ...patternFilter,
+    ...materialFilter,
+    ...genderFilter,
+    ...priceFilter,
+    ...shippingFilter,
+    ...ratingFilter,
+  });
+
   const searchedProducts = await Product.find({
     ...search,
     ...categoryFilter,
@@ -301,11 +320,14 @@ exports.getSearchedProducts = asyncHandler(async (req, res, next) => {
     ...priceFilter,
     ...shippingFilter,
     ...ratingFilter,
-  }).sort(sortFilter);
+  })
+    .sort(sortFilter)
+    .skip(startIndex)
+    .limit(limitQuery);
 
   return res.json({
     status: 'success',
-    result: searchedProducts?.length,
+    result: productsCount,
     data: searchedProducts,
   });
 });
